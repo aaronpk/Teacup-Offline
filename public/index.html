@@ -13,14 +13,15 @@
 <script src="js/pouchdb-7.0.0.min.js"></script>
 <script src="js/script.js"></script>
 <script>
+// Register the ServiceWorker. In future browser versions, the rel=serviceworker link above will be enough
 if(navigator.serviceWorker) {
   navigator.serviceWorker.register('/serviceworker.js')
 }
 
+// Set up PouchDB. Make sure this database name matches the one in serviceworker.js
 var DB = new PouchDB('teacup-1', {
   adapter: 'idb'
 });
-
 </script>
 </head>
 <body>
@@ -52,7 +53,7 @@ var DB = new PouchDB('teacup-1', {
   <a href="settings.html">Settings</a>
 </div>
 <div class="form-group">
-  version 47
+  version 49
 </div>
 
 <hr>
@@ -78,13 +79,14 @@ function zero_pad(num) {
   return num;
 }
 
+// This function lets us run a series of promises sequentially, waiting for each to finish
 // https://hackernoon.com/functional-javascript-resolving-promises-sequentially-7aac18c4431e
-  
 const promiseSerial = funcs =>
   funcs.reduce((promise, func) =>
     promise.then(result => func().then(Array.prototype.concat.bind(result))),
     Promise.resolve([]))
 
+// Capture events from the ServiceWorker
 navigator.serviceWorker.addEventListener('message', function(event){
   console.log('got event from serviceworker', event);
   if(event.data == "new-post") {
@@ -95,14 +97,15 @@ navigator.serviceWorker.addEventListener('message', function(event){
 });
   
 $(function(){
-  // Set the date from JS
+
+  // Set the date from JS so that we get the local time and timezone offset
   var d = new Date();
   $("#date").val(d.getFullYear()+"-"+zero_pad(d.getMonth()+1)+"-"+zero_pad(d.getDate()));
   $("#time").val(zero_pad(d.getHours())+":"+zero_pad(d.getMinutes())+":"+zero_pad(d.getSeconds()));
   $("#tzoffset").val(tz_seconds_to_offset(d.getTimezoneOffset() * 60 * -1));
 
+  // When the user clicks submit, send a POST request which will be intercepted by the ServiceWorker
   $("#submit").click(function(){
-
     $.post("save", JSON.stringify({
       date: $("#date").val(),
       time: $("#time").val(),
@@ -110,14 +113,16 @@ $(function(){
       name: $("#name").val(),
       type: $("#type").val(),
     }), function(response){
+      // This response is just the acknowledgment that the request was received by the ServiceWorker,
+      // but the post hasn't yet actually been written to the database.
       console.log('response from save', response);
     });
-    
   });
   
   updateOnlineStatus();
 });
 
+// Refresh the UI to show all the posts in the database
 function refreshSavedPosts() {
   console.log("Loading posts from database");
   loadAllPosts(posts => {
@@ -133,6 +138,7 @@ function refreshSavedPosts() {
   });
 }
 
+// Query PouchDB for all posts
 function loadAllPosts(callback) {
   DB.allDocs({
     include_docs: true
@@ -141,12 +147,13 @@ function loadAllPosts(callback) {
   });
 }
 
+// Delete a post from PouchDB
 function deleteLocalPost(doc, callback) {
   DB.remove(doc, callback);
 }
 
+// Send Micropub requests for all saved posts
 function syncAllPosts() {
-  return;
 
   // When online, sync any saved entries
   loadAllPosts(posts => {
@@ -160,9 +167,11 @@ function syncAllPosts() {
   });
 }
 
+// Make the Micropub request for the given post
 function postThis(post) {
   return new Promise(function(resolve, reject){
 
+    // Get the Micropub endpoint from LocalStorage
     var micropub = localStorage.getItem("micropub");
     
     if(!micropub) {
@@ -173,6 +182,7 @@ function postThis(post) {
     var token = localStorage.getItem("accesstoken");
     console.log("Syncing post", post);
 
+    // Build the h-entry object for the Micropub request
     var postData = {};
     postData = {
       type: ['h-entry'],
@@ -188,6 +198,7 @@ function postThis(post) {
       }
     }];
 
+    // Make the Micropub request now
     $.ajax({
       url: micropub,
       type: 'post',
@@ -197,11 +208,15 @@ function postThis(post) {
         'Content-Type': 'application/json',
       },
       dataType: 'json',
-      success: function(data){
-        console.log(data);
-        if(data.url) {
-          
+      success: function(data, status, request){
+        console.log(data, request);
+
+        // If the Micropub endpoint returned a Location header, consider it successful
+        if(request.getResponseHeader('location')) {
+
+          // Delete the post from the local database
           deleteLocalPost(post.doc, function(id){
+            // Remove the post from view
             $("#post-"+post.doc._id).remove();
           });
           
