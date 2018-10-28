@@ -1,0 +1,56 @@
+<html>
+<head>
+<title>Settings</title>
+<link rel="serviceworker" href="serviceworker.js">
+<link rel="stylesheet" href="style.css">
+<script src="js/jquery-3.3.1.js"></script>
+<script src="js/pouchdb-7.0.0.min.js"></script>
+<script src="js/script.js"></script>
+<meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
+</head>
+<body>
+
+<div id="content">
+
+<div class="form-group">
+  <p><a href="/">&larr; Back</a></p>
+</div>
+  
+<div class="form-group">
+  <input type="url" id="micropub" placeholder="micropub endpoint">
+</div>
+
+<div class="form-group">
+  <input type="password" id="accesstoken" placeholder="access token">
+</div>
+
+<div class="form-group">
+  <button id="save">Save</button>
+</div>
+
+</div>
+
+<script>
+$(function(){
+  
+  var m = localStorage.getItem("micropub");
+  if(m) {
+    $("#micropub").val(m);
+    $("#accesstoken").val("*");
+  }
+  
+  $("#save").click(function(){
+    localStorage.setItem("micropub", $("#micropub").val());
+    localStorage.setItem("accesstoken", $("#accesstoken").val());
+    
+    $("#micropub").val("");
+    $("#accesstoken").val("");
+    
+    alert("Saved!");
+  });
+    
+});
+</script>
+
+</body>
+</html>

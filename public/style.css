@@ -1,0 +1,28 @@
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+body.online {
+  border-top: 12px #65b338 solid;
+}
+
+body.offline {
+  border-top: 12px #b23838 solid;
+}
+
+#content {
+  padding: 0 60px;
+}
+
+#saved ul .date {
+  font-size: 0.8em;
+  color: #444;
+}
+
+.form-group {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}

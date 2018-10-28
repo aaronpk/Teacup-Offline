@@ -1,0 +1,222 @@
+<html>
+<head>
+<title>Teacup Offline</title>
+<link rel="manifest" href="manifest.json">
+<link rel="serviceworker" href="serviceworker.js">
+<link rel="stylesheet" href="/style.css">
+<link rel="apple-touch-icon" sizes="57x57" href="/images/teacup-icon-57.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/images/teacup-icon-72.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/images/teacup-icon-114.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/images/teacup-icon-144.png">
+<meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
+<script src="js/jquery-3.3.1.js"></script>
+<script src="js/pouchdb-7.0.0.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+if(navigator.serviceWorker) {
+  navigator.serviceWorker.register('/serviceworker.js')
+}
+
+var DB = new PouchDB('teacup-1', {
+  adapter: 'idb'
+});
+
+</script>
+</head>
+<body>
+
+<div id="content">
+  
+<div class="form-group">
+  <input type="date" id="date">
+  <input type="time" id="time">
+  <input type="text" size="8" id="tzoffset" value="">
+</div>
+
+<div class="form-group">
+  <input type="text" id="name" value="Coffee">
+</div>
+
+<div class="form-group">
+  <select id="type">
+    <option value="drank">Drank</option>
+    <option value="ate">Ate</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <button id="submit">Save</button>
+</div>
+
+<div class="form-group">
+  <a href="settings.html">Settings</a>
+</div>
+<div class="form-group">
+  version 47
+</div>
+
+<hr>
+
+<div id="saved">
+  <ul></ul>  
+</div>
+
+</div>
+
+<script>
+function tz_seconds_to_offset(seconds) {
+  var tz_offset = '';
+  var hours = zero_pad(Math.floor(Math.abs(seconds / 60 / 60)));
+  var minutes = zero_pad(Math.floor(seconds / 60) % 60);
+  return (seconds < 0 ? '-' : '+') + hours + ":" + minutes;
+}
+function zero_pad(num) {
+  num = "" + num;
+  if(num.length == 1) {
+    num = "0" + num;
+  }
+  return num;
+}
+
+// https://hackernoon.com/functional-javascript-resolving-promises-sequentially-7aac18c4431e
+  
+const promiseSerial = funcs =>
+  funcs.reduce((promise, func) =>
+    promise.then(result => func().then(Array.prototype.concat.bind(result))),
+    Promise.resolve([]))
+
+navigator.serviceWorker.addEventListener('message', function(event){
+  console.log('got event from serviceworker', event);
+  if(event.data == "new-post") {
+    refreshSavedPosts();
+  } else {
+    // alert(event.data);
+  }
+});
+  
+$(function(){
+  // Set the date from JS
+  var d = new Date();
+  $("#date").val(d.getFullYear()+"-"+zero_pad(d.getMonth()+1)+"-"+zero_pad(d.getDate()));
+  $("#time").val(zero_pad(d.getHours())+":"+zero_pad(d.getMinutes())+":"+zero_pad(d.getSeconds()));
+  $("#tzoffset").val(tz_seconds_to_offset(d.getTimezoneOffset() * 60 * -1));
+
+  $("#submit").click(function(){
+
+    $.post("save", JSON.stringify({
+      date: $("#date").val(),
+      time: $("#time").val(),
+      tzoffset: $("#tzoffset").val(),
+      name: $("#name").val(),
+      type: $("#type").val(),
+    }), function(response){
+      console.log('response from save', response);
+    });
+    
+  });
+  
+  updateOnlineStatus();
+});
+
+function refreshSavedPosts() {
+  console.log("Loading posts from database");
+  loadAllPosts(posts => {
+    $("#saved ul").empty();
+    console.log(posts.rows);
+    posts.rows.forEach(post => {
+      var li = document.createElement('li');
+      console.log(post.doc);
+      li.setAttribute('id', 'post-'+post.doc._id);
+      li.innerHTML = '<span class="date">'+post.doc.date+" "+post.doc.time+" "+post.doc.tzoffset+"</span><br>"+post.doc.type+": "+post.doc.name;
+      $("#saved ul").append(li);
+    })
+  });
+}
+
+function loadAllPosts(callback) {
+  DB.allDocs({
+    include_docs: true
+  }).then(items => {
+    callback(items)
+  });
+}
+
+function deleteLocalPost(doc, callback) {
+  DB.remove(doc, callback);
+}
+
+function syncAllPosts() {
+  return;
+
+  // When online, sync any saved entries
+  loadAllPosts(posts => {
+
+    const funcs = posts.rows.map(post => () => postThis(post))
+
+    promiseSerial(funcs)
+      .then(console.log.bind(console))
+      .catch(console.error.bind(console))
+
+  });
+}
+
+function postThis(post) {
+  return new Promise(function(resolve, reject){
+
+    var micropub = localStorage.getItem("micropub");
+    
+    if(!micropub) {
+      resolve();
+      return;
+    }
+    
+    var token = localStorage.getItem("accesstoken");
+    console.log("Syncing post", post);
+
+    var postData = {};
+    postData = {
+      type: ['h-entry'],
+      properties: {
+        published: [post.doc.date+"T"+post.doc.time+post.doc.tzoffset],
+        summary: ['Just '+post.doc.type+': '+post.doc.name],
+      }
+    };
+    postData.properties[post.doc.type] = [{
+      type: ['h-food'],
+      properties: {
+        name: [post.doc.name],
+      }
+    }];
+
+    $.ajax({
+      url: micropub,
+      type: 'post',
+      data: JSON.stringify(postData),
+      headers: {
+        Authorization: 'Bearer '+token,
+        'Content-Type': 'application/json',
+      },
+      dataType: 'json',
+      success: function(data){
+        console.log(data);
+        if(data.url) {
+          
+          deleteLocalPost(post.doc, function(id){
+            $("#post-"+post.doc._id).remove();
+          });
+          
+        }
+        resolve();
+      },
+      error: function() {
+        resolve();
+      }
+    });
+
+  });
+}
+
+</script>
+
+</body>
+</html>
