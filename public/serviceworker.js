@@ -3,7 +3,7 @@
 self.importScripts('js/pouchdb-7.0.0.min.js');
 
 // Update this when you need to force the cache to reload
-const version = 67;
+const version = 69;
 const staticCacheName = 'teacup-'+version;
 
 // Set up the local database in IndexDB
