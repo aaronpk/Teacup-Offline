@@ -3,21 +3,24 @@
 <title>Teacup Offline</title>
 <link rel="manifest" href="manifest.json">
 <link rel="serviceworker" href="serviceworker.js">
-<link rel="stylesheet" href="/style.css">
-<link rel="apple-touch-icon" sizes="57x57" href="/images/teacup-icon-57.png">
-<link rel="apple-touch-icon" sizes="72x72" href="/images/teacup-icon-72.png">
-<link rel="apple-touch-icon" sizes="114x114" href="/images/teacup-icon-114.png">
-<link rel="apple-touch-icon" sizes="144x144" href="/images/teacup-icon-144.png">
+<link rel="stylesheet" href="bootstrap-4.1.3/css/bootstrap.min.css">
+<link rel="stylesheet" href="style.css">
+<link rel="apple-touch-icon" sizes="57x57" href="images/teacup-icon-57.png">
+<link rel="apple-touch-icon" sizes="72x72" href="images/teacup-icon-72.png">
+<link rel="apple-touch-icon" sizes="114x114" href="images/teacup-icon-114.png">
+<link rel="apple-touch-icon" sizes="144x144" href="images/teacup-icon-144.png">
 <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
 <script src="js/jquery-3.3.1.js"></script>
+<script src="bootstrap-4.1.3/js/bootstrap.min.js"></script>
 <script src="js/pouchdb-7.0.0.min.js"></script>
 <script src="js/script.js"></script>
 <script>
 // Register the ServiceWorker. In future browser versions, the rel=serviceworker link above will be enough
+/*
 if(navigator.serviceWorker) {
   navigator.serviceWorker.register('/serviceworker.js')
 }
-
+*/
 // Set up PouchDB. Make sure this database name matches the one in serviceworker.js
 var DB = new PouchDB('teacup-1', {
   adapter: 'idb'
@@ -26,40 +29,99 @@ var DB = new PouchDB('teacup-1', {
 </head>
 <body>
 
-<div id="content">
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="/">
+    <img src="/images/teacup-144.png" width="30" height="30" alt="">
+    Teacup
+  </a>
+  
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/settings.html">Settings</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled">Version <span id="version"></span></a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div id="container" class="container">
   
 <div class="form-group">
-  <input type="date" id="date">
-  <input type="time" id="time">
-  <input type="text" size="8" id="tzoffset" value="">
+  <input type="date" id="date" class="form-control">
 </div>
 
 <div class="form-group">
-  <input type="text" id="name" value="Coffee">
+  <input type="time" id="time" class="form-control">
 </div>
 
 <div class="form-group">
-  <select id="type">
+  <select id="tzoffset" class="form-control">
+    <option value="-12:00">-12:00</option>
+    <option value="-11:00">-11:00</option>
+    <option value="-10:00">-10:00</option>
+    <option value="-09:30">-09:30</option>
+    <option value="-09:00">-09:00</option>
+    <option value="-08:00">-08:00</option>
+    <option value="-07:00">-07:00</option>
+    <option value="-06:00">-06:00</option>
+    <option value="-05:00">-05:00</option>
+    <option value="-04:00">-04:00</option>
+    <option value="-03:30">-03:30</option>
+    <option value="-02:00">-02:00</option>
+    <option value="-01:00">-01:00</option>
+    <option value="+00:00">+00:00</option>
+    <option value="+01:00">+01:00</option>
+    <option value="+02:00">+02:00</option>
+    <option value="+03:00">+03:00</option>
+    <option value="+03:30">+03:30</option>
+    <option value="+04:00">+04:00</option>
+    <option value="+04:30">+04:30</option>
+    <option value="+05:00">+05:00</option>
+    <option value="+05:30">+05:30</option>
+    <option value="+05:45">+05:45</option>
+    <option value="+06:00">+06:00</option>
+    <option value="+06:30">+06:30</option>
+    <option value="+07:00">+07:00</option>
+    <option value="+08:00">+08:00</option>
+    <option value="+08:45">+08:45</option>
+    <option value="+09:00">+09:00</option>
+    <option value="+09:30">+09:30</option>
+    <option value="+10:00">+10:00</option>
+    <option value="+10:30">+10:30</option>
+    <option value="+11:00">+11:00</option>
+    <option value="+12:00">+12:00</option>
+    <option value="+12:45">+12:45</option>
+    <option value="+13:00">+13:00</option>
+    <option value="+14:00">+14:00</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <select id="type" class="form-control">
     <option value="drank">Drank</option>
     <option value="ate">Ate</option>
   </select>
 </div>
 
 <div class="form-group">
-  <button id="submit">Save</button>
+  <input type="text" id="name" class="form-control" value="">
 </div>
 
 <div class="form-group">
-  <a href="settings.html">Settings</a>
-</div>
-<div class="form-group">
-  version 49
+  <button id="submit" class="btn btn-primary">Save</button>
 </div>
 
 <hr>
 
 <div id="saved">
-  <ul></ul>  
+  <ul class="list-group"></ul>  
 </div>
 
 </div>
@@ -91,51 +153,73 @@ navigator.serviceWorker.addEventListener('message', function(event){
   console.log('got event from serviceworker', event);
   if(event.data == "new-post") {
     refreshSavedPosts();
+    // When the ServiceWorker confirms the post is saved, reset the form
+    resetDateFields();
+    $("#name").val("");
+  } else if(m=event.data.match(/version-(.+)/)) {
+    $("#version").text(m[1]);
   } else {
     // alert(event.data);
   }
 });
-  
+
+navigator.serviceWorker.controller.postMessage('version');
+
 $(function(){
 
+  resetDateFields();
+    
+  // When the user clicks submit, send the post data to the ServiceWorker
+  $("#submit").click(function(){
+    navigator.serviceWorker.controller.postMessage({
+      action: 'create',
+      post: {
+        date: $("#date").val(),
+        time: $("#time").val(),
+        tzoffset: $("#tzoffset").val(),
+        name: $("#name").val(),
+        type: $("#type").val(),
+      }
+    });
+  });
+    
+  updateOnlineStatus();
+});
+
+function resetDateFields() {
   // Set the date from JS so that we get the local time and timezone offset
   var d = new Date();
   $("#date").val(d.getFullYear()+"-"+zero_pad(d.getMonth()+1)+"-"+zero_pad(d.getDate()));
   $("#time").val(zero_pad(d.getHours())+":"+zero_pad(d.getMinutes())+":"+zero_pad(d.getSeconds()));
-  $("#tzoffset").val(tz_seconds_to_offset(d.getTimezoneOffset() * 60 * -1));
-
-  // When the user clicks submit, send a POST request which will be intercepted by the ServiceWorker
-  $("#submit").click(function(){
-    $.post("save", JSON.stringify({
-      date: $("#date").val(),
-      time: $("#time").val(),
-      tzoffset: $("#tzoffset").val(),
-      name: $("#name").val(),
-      type: $("#type").val(),
-    }), function(response){
-      // This response is just the acknowledgment that the request was received by the ServiceWorker,
-      // but the post hasn't yet actually been written to the database.
-      console.log('response from save', response);
-    });
-  });
-  
-  updateOnlineStatus();
-});
+  $("#tzoffset").val(tz_seconds_to_offset(d.getTimezoneOffset() * 60 * -1));  
+}
 
 // Refresh the UI to show all the posts in the database
 function refreshSavedPosts() {
   console.log("Loading posts from database");
   loadAllPosts(posts => {
     $("#saved ul").empty();
-    console.log(posts.rows);
     posts.rows.forEach(post => {
       var li = document.createElement('li');
       console.log(post.doc);
       li.setAttribute('id', 'post-'+post.doc._id);
-      li.innerHTML = '<span class="date">'+post.doc.date+" "+post.doc.time+" "+post.doc.tzoffset+"</span><br>"+post.doc.type+": "+post.doc.name;
+      li.setAttribute('data-id', post.doc._id);
+      li.setAttribute('class', 'list-group-item d-flex justify-content-between align-items-center');
+      li.innerHTML = '<span><span class="date">'+post.doc.date+" "+post.doc.time+" "+post.doc.tzoffset+"</span><br>"+post.doc.type+": "+post.doc.name+'</span>';
+      li.innerHTML += '<a class="badge badge-light badge-pill delete-post" href="#">&times;</a>';
       $("#saved ul").append(li);
-    })
+    });
+    bindDeleteButtons();
   });
+}
+
+function bindDeleteButtons() {
+  $(".delete-post").unbind('click').click(function(){
+    DB.get(''+$(this).parents('li').data('id')).then(doc => {
+      deleteLocalPost(doc);
+    });
+    return false;
+  });  
 }
 
 // Query PouchDB for all posts
@@ -149,17 +233,23 @@ function loadAllPosts(callback) {
 
 // Delete a post from PouchDB
 function deleteLocalPost(doc, callback) {
-  DB.remove(doc, callback);
+  var id = doc._id;
+  DB.remove(doc, function(){
+    // Remove the post from view
+    $("#post-"+id).remove();
+    if(callback) {
+      callback();
+    }
+  });
 }
 
 // Send Micropub requests for all saved posts
 function syncAllPosts() {
-
-  // When online, sync any saved entries
   loadAllPosts(posts => {
 
     const funcs = posts.rows.map(post => () => postThis(post))
 
+    // Run sequentially waiting for each to finish
     promiseSerial(funcs)
       .then(console.log.bind(console))
       .catch(console.error.bind(console))
@@ -215,15 +305,13 @@ function postThis(post) {
         if(request.getResponseHeader('location')) {
 
           // Delete the post from the local database
-          deleteLocalPost(post.doc, function(id){
-            // Remove the post from view
-            $("#post-"+post.doc._id).remove();
-          });
+          deleteLocalPost(post.doc);
           
         }
         resolve();
       },
       error: function() {
+        // Continue on errors otherwise the chain of sequential functions stops
         resolve();
       }
     });

@@ -3,7 +3,8 @@
 self.importScripts('js/pouchdb-7.0.0.min.js');
 
 // Update this when you need to force the cache to reload
-const staticCacheName = 'teacup-49';
+const version = 67;
+const staticCacheName = 'teacup-'+version;
 
 // Set up the local database in IndexDB
 var DB = new PouchDB('teacup-1', {
@@ -43,10 +44,27 @@ addEventListener('activate', activateEvent => {
 
 });
 
+addEventListener('message', messageEvent => {
+  console.log('Got message', messageEvent);
+  
+  if(messageEvent.data == 'version') {
+    sendAlert('version-'+version);
+    return;
+  }
+  
+  if(messageEvent.data.action == 'create') {
+    addNewPost(messageEvent.data.post, function(){
+      console.log('Saved new post');
+      sendAlert('new-post');
+    });
+    return;
+  }
+  
+});
+
 // Intercept HTTP requests
 addEventListener("fetch", fetchEvent => {
   var t = fetchEvent.request, a = new URL(t.url);
-  //console.log(t);
 
   const request = fetchEvent.request;
   fetchEvent.respondWith(
@@ -56,40 +74,6 @@ addEventListener("fetch", fetchEvent => {
     .then(responseFromCache => {
       if(responseFromCache) {
         return responseFromCache;
-      }
-      
-      var url = new URL(t.url);
-
-      // Check if it matches the path to save posts
-      if(url.pathname == "/save") {
-        console.log("catching /save");
-        console.log(request);
-
-        // The front-end posts JSON, so parse as JSON to return the raw data.
-        // iOS doesn't support formData() so we have to use json() instead.
-        request.json().then(data => {
-
-          var post = {
-            date: data['date'],
-            time: data['time'],
-            tzoffset: data['tzoffset'],
-            name: data['name'],
-            type: data['type'],
-          }
-          
-          // Write the post to the database
-          addNewPost(post, function(){
-            console.log('Complete');
-
-            // Notify the front-end that the post was created
-            sendAlert('new-post');
-          });
-
-        })
-        .catch(e => {
-          sendAlert(e.message);
-        })
-        return new Response("saved");
       }
       
       // Otherwise fetch from the network
@@ -116,6 +100,9 @@ function cacheAssets() {
       '/js/jquery-3.3.1.js',
       '/js/pouchdb-7.0.0.min.js',
       '/js/script.js',
+      '/images/teacup-144.png',
+      '/bootstrap-4.1.3/css/bootstrap.min.css',
+      '/bootstrap-4.1.3/js/bootstrap.min.js',
     ]);
   })
 }

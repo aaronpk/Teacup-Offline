@@ -2,6 +2,8 @@ window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
 function updateOnlineStatus(event) {
+  console.log("Device is "+(navigator.onLine ? "online" : "offline"));
+  
   if(navigator.onLine) {
     $("body").addClass("online").removeClass("offline");
     if(window.syncAllPosts) {
