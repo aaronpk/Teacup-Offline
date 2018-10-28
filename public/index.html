@@ -16,11 +16,9 @@
 <script src="js/script.js"></script>
 <script>
 // Register the ServiceWorker. In future browser versions, the rel=serviceworker link above will be enough
-/*
 if(navigator.serviceWorker) {
   navigator.serviceWorker.register('/serviceworker.js')
 }
-*/
 // Set up PouchDB. Make sure this database name matches the one in serviceworker.js
 var DB = new PouchDB('teacup-1', {
   adapter: 'idb'
@@ -234,6 +232,7 @@ function loadAllPosts(callback) {
 // Delete a post from PouchDB
 function deleteLocalPost(doc, callback) {
   var id = doc._id;
+  console.log('removing post from database');
   DB.remove(doc, function(){
     // Remove the post from view
     $("#post-"+id).remove();
