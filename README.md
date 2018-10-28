@@ -8,6 +8,59 @@ You can bookmark this to your home screen to install it as an app, and you'll be
 To set this up, go into the settings and paste in your Micropub endpoint and access token. (IndieAuth support coming later)
 
 
+Micropub Support
+----------------
+
+To support this app, your Micropub endpoint will need to understand JSON requests and also send the appropriate CORS headers.
+
+### JSON Requests
+
+Teacup sends a JSON post that looks like the below.
+
+```json
+{
+  "type": ["h-entry"],
+  "properties": {
+    "published": ["2018-10-28T15:00:00-0700"],
+    "summary": ["Just drank: Coffee"],
+    "drank": [{
+      "type": ["h-food"],
+      "properties": {
+        "name": ["Coffee"]
+      }
+    }]
+  }
+}
+```
+
+```json
+{
+  "type": ["h-entry"],
+  "properties": {
+    "published": ["2018-10-28T06:30:00-0700"],
+    "summary": ["Just ate: Tacos"],
+    "ate": [{
+      "type": ["h-food"],
+      "properties": {
+        "name": ["Tacos"]
+      }
+    }]
+  }
+}
+```
+
+### CORS Support
+
+To make this work in Chrome and iOS Safari, I had to make sure my Micropub endpoint returned the following headers.
+
+```
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Headers: Authorization,Content-Type,Accept,Referer,Origin,User-Agent,Cache-Control,Pragma
+```
+
+The browser will probably first make an OPTIONS request without an access token, so make sure that your server isn't set up to reject that unauthenticated request.
+
+
 Credits
 -------
 
