@@ -1,0 +1,37 @@
+{
+  "lang": "en",
+  "name": "Teacup Offline",
+  "short_name": "Teacup Offline",
+  "description": "Offline-first Micropub app to track what you eat and drink",
+  "theme_color": "#0C4349",
+  "background_color": "#ffffff",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/images/teacup-icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/teacup-icon-114.png",
+      "sizes": "114x114",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/teacup-icon-108.png",
+      "sizes": "108x108",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/teacup-icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/teacup-icon-57.png",
+      "sizes": "57x57",
+      "type": "image/png"
+    }
+  ]
+}
