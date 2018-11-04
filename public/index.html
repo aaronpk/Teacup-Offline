@@ -32,11 +32,11 @@ var DB = new PouchDB('teacup-1', {
     <img src="/images/teacup-144.png" width="30" height="30" alt="">
     Teacup
   </a>
-  
+
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  
+
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
@@ -120,7 +120,7 @@ var DB = new PouchDB('teacup-1', {
 <hr>
 
 <div id="saved">
-  <ul class="list-group"></ul>  
+  <ul class="list-group"></ul>
 </div>
 
 </div>
@@ -220,7 +220,7 @@ function bindDeleteButtons() {
       deleteLocalPost(doc);
     });
     return false;
-  });  
+  });
 }
 
 // Query PouchDB for all posts
@@ -265,12 +265,12 @@ function postThis(post) {
 
     // Get the Micropub endpoint from LocalStorage
     var micropub = localStorage.getItem("micropub");
-    
+
     if(!micropub) {
       resolve();
       return;
     }
-    
+
     var token = localStorage.getItem("accesstoken");
     console.log("Syncing post", post);
 
@@ -308,7 +308,7 @@ function postThis(post) {
 
           // Delete the post from the local database
           deleteLocalPost(post.doc);
-          
+
         }
         resolve();
       },

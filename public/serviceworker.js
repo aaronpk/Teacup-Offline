@@ -125,7 +125,7 @@ function addNewPost(post, callback) {
 // Load posts from the database
 function loadAllPosts(callback) {
   console.log(DB);
-  
+
   DB.allDocs({
     include_docs: true
   }).then(items => {
@@ -141,5 +141,5 @@ function sendAlert(alert) {
     clients.forEach(client => {
       client.postMessage(alert);
     })
-  })  
+  })
 }
