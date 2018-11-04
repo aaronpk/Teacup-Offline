@@ -3,7 +3,7 @@
 self.importScripts('js/pouchdb-7.0.0.min.js');
 
 // Update this when you need to force the cache to reload
-const version = 69;
+const version = 70;
 const staticCacheName = 'teacup-'+version;
 
 // Set up the local database in IndexDB
@@ -91,8 +91,13 @@ function cacheAssets() {
   caches.open(staticCacheName)
   .then( cache => {
     // Nice to have, won't error if these fail
-    //cache.addAll([
-    //]);
+    cache.addAll([
+      'images/teacup-16px.png',
+      'images/teacup-icon-57.png',
+      'images/teacup-icon-72.png',
+      'images/teacup-icon-114.png',
+      'images/teacup-icon-144.png',
+    ]);
 
     // Must have, will error if they fail to download
     return cache.addAll([
