@@ -38,7 +38,9 @@ addEventListener('activate', activateEvent => {
       ); // end return Promise.all
     }) // end keys then
     .then( () => {
-      return clients.claim();
+      var claim = clients.claim();
+      sendAlert('version-'+version);
+      return claim;
     }) // end then
   );
 
@@ -46,12 +48,12 @@ addEventListener('activate', activateEvent => {
 
 addEventListener('message', messageEvent => {
   console.log('Got message', messageEvent);
-  
+
   if(messageEvent.data == 'version') {
     sendAlert('version-'+version);
     return;
   }
-  
+
   if(messageEvent.data.action == 'create') {
     addNewPost(messageEvent.data.post, function(){
       console.log('Saved new post');
@@ -59,7 +61,7 @@ addEventListener('message', messageEvent => {
     });
     return;
   }
-  
+
 });
 
 // Intercept HTTP requests
@@ -68,17 +70,17 @@ addEventListener("fetch", fetchEvent => {
 
   const request = fetchEvent.request;
   fetchEvent.respondWith(
-    
+
     // First look in the cache
     caches.match(request)
     .then(responseFromCache => {
       if(responseFromCache) {
         return responseFromCache;
       }
-      
+
       // Otherwise fetch from the network
       return fetch(request);
-      
+
     }) // end match then
 
   ); // end respondWith
@@ -88,7 +90,7 @@ addEventListener("fetch", fetchEvent => {
 function cacheAssets() {
   caches.open(staticCacheName)
   .then( cache => {
-    // Nice to have, won't error if these fail 
+    // Nice to have, won't error if these fail
     //cache.addAll([
     //]);
 

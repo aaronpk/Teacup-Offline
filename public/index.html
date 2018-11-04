@@ -162,12 +162,14 @@ navigator.serviceWorker.addEventListener('message', function(event){
   }
 });
 
-navigator.serviceWorker.controller.postMessage('version');
+if(navigator.serviceWorker.controller) {
+  navigator.serviceWorker.controller.postMessage('version');
+}
 
 $(function(){
 
   resetDateFields();
-    
+
   // When the user clicks submit, send the post data to the ServiceWorker
   $("#submit").click(function(){
     navigator.serviceWorker.controller.postMessage({
@@ -181,7 +183,7 @@ $(function(){
       }
     });
   });
-    
+
   updateOnlineStatus();
 });
 
@@ -190,7 +192,7 @@ function resetDateFields() {
   var d = new Date();
   $("#date").val(d.getFullYear()+"-"+zero_pad(d.getMonth()+1)+"-"+zero_pad(d.getDate()));
   $("#time").val(zero_pad(d.getHours())+":"+zero_pad(d.getMinutes())+":"+zero_pad(d.getSeconds()));
-  $("#tzoffset").val(tz_seconds_to_offset(d.getTimezoneOffset() * 60 * -1));  
+  $("#tzoffset").val(tz_seconds_to_offset(d.getTimezoneOffset() * 60 * -1));
 }
 
 // Refresh the UI to show all the posts in the database
